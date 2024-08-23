@@ -1,0 +1,325 @@
+package fileManagerAssignment;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class FileManager {
+
+    private List<File> files = new ArrayList<>();
+    private Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        FileManager fileManager = new FileManager();
+        fileManager.run();
+    }
+
+    public void run() {
+        int choice;
+        do {
+            displayDateTime();
+            displayMainMenu();
+            choice = scanner.nextInt();
+            scanner.nextLine(); 
+            switch (choice) {
+                case 1:
+                    displayCreateMenu();
+                    break;
+                case 2:
+                    displayDeleteMenu();
+                    break;
+                case 3:
+                    displayRenameMenu();
+                    break;
+                case 4:
+                    viewAllFiles();
+                    break;
+                case 5:
+                    editFile();
+                    break;
+                case 6:
+                    displayFile();
+                    break;
+                case 0:
+                    System.out.println("Exiting...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 0);
+    }
+
+    private void displayDateTime() {
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+        System.out.println("Date: " + currentDate + "    Time: " + currentTime);
+    }
+
+    private void displayMainMenu() {
+        System.out.println("\t"+"File Manager");
+        System.out.println("1. Create Folder or File");
+        System.out.println("2. Delete Folder or File");
+        System.out.println("3. Rename Folder or File");
+        System.out.println("4. View all Files");
+        System.out.println("5. Edit File");
+        System.out.println("6. Display File");
+        System.out.println("\n"+"0. Exit");
+        System.out.print("\n"+"Enter your choice: ");
+    }
+
+    private void displayCreateMenu() {
+        System.out.println("Create Folder/ File");
+        displayDateTime();
+        System.out.println("1. New Folder");
+        System.out.println("2. New File");
+        System.out.println("0. Back to previous page");
+        System.out.print("Enter your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine(); 
+
+        switch (choice) {
+            case 1:
+                createNewFolder();
+                break;
+            case 2:
+                createNewFile();
+                break;
+            case 0:
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void createNewFolder() {
+        System.out.print("Enter new folder name: ");
+        String folderName = scanner.nextLine();
+        java.io.File folder = new java.io.File(folderName);
+        if (folder.mkdirs()) {
+            System.out.println("Folder created successfully. Modified date: " + LocalDate.now());
+        } else {
+            System.out.println("Failed to create folder.");
+        }
+    }
+
+    private void createNewFile() {
+        System.out.print("Enter new file name: ");
+        String fileName = scanner.nextLine();
+        System.out.print("Do you want to save it in a folder (yes/no): ");
+        String saveInFolder = scanner.nextLine();
+
+        if (saveInFolder.equalsIgnoreCase("yes")) {
+            System.out.print("Enter folder name: ");
+            String folderName = scanner.nextLine();
+            java.io.File folder = new java.io.File(folderName);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            fileName = folderName + "/" + fileName;
+        }
+
+        try (FileWriter writer = new FileWriter(fileName + ".txt")) {
+            System.out.print("Enter content for the file: ");
+            String content = scanner.nextLine();
+            writer.write(content);
+            System.out.println("File created successfully. Modified date: " + LocalDate.now());
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating the file.");
+            e.printStackTrace();
+        }
+    }
+
+    private void displayDeleteMenu() {
+        System.out.println("Delete Folder/ File");
+        displayDateTime();
+        System.out.println("1. Delete Folder");
+        System.out.println("2. Delete File");
+        System.out.println("0. Back to previous page");
+        System.out.print("Enter your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();  
+
+        switch (choice) {
+            case 1:
+                deleteFolder();
+                break;
+            case 2:
+                deleteFile();
+                break;
+            case 0:
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void deleteFolder() {
+        System.out.print("Enter the name of the folder to be deleted: ");
+        String folderName = scanner.nextLine();
+        java.io.File folder = new java.io.File(folderName);
+        if (folder.exists() && folder.isDirectory()) {
+            if (deleteDirectoryRecursively(folder)) {
+                System.out.println("Folder deleted successfully.");
+            } else {
+                System.out.println("Failed to delete folder.");
+            }
+        } else {
+            System.out.println("Folder does not exist.");
+        }
+    }
+
+    private boolean deleteDirectoryRecursively(java.io.File directory) {
+        java.io.File[] allContents = directory.listFiles();
+        if (allContents != null) {
+            for (java.io.File file : allContents) {
+                if (file.isDirectory()) {
+                    deleteDirectoryRecursively(file);
+                } else {
+                    if (!file.delete()) {
+                        System.out.println("Failed to delete file: " + file.getPath());
+                        return false;
+                    }
+                }
+            }
+        }
+        return directory.delete();
+    }
+
+    private void deleteFile() {
+        System.out.print("Enter the full path of the file to be deleted (including folder name if applicable): ");
+        String fileName = scanner.nextLine();
+        
+        java.io.File file = new java.io.File(fileName);
+        
+        if (file.exists() && file.isFile()) {
+            if (file.delete()) {
+                System.out.println("File deleted successfully.");
+            } else {
+                System.out.println("Failed to delete file.");
+            }
+        } else {
+            System.out.println("File does not exist or is not a file.");
+        }
+    }
+
+    private void displayRenameMenu() {
+        System.out.println("Rename Folder/ File");
+        displayDateTime();
+        System.out.println("1. Rename Folder");
+        System.out.println("2. Rename File");
+        System.out.println("0. Back to previous page");
+        System.out.print("Enter your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine(); 
+
+        switch (choice) {
+            case 1:
+                renameFolder();
+                break;
+            case 2:
+                renameFile();
+                break;
+            case 0:
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void renameFolder() {
+        System.out.print("Enter the current folder name: ");
+        String oldFolderName = scanner.nextLine();
+        System.out.print("Enter the new folder name: ");
+        String newFolderName = scanner.nextLine();
+        java.io.File oldFolder = new java.io.File(oldFolderName);
+        java.io.File newFolder = new java.io.File(newFolderName);
+        if (oldFolder.renameTo(newFolder)) {
+            System.out.println("Folder renamed successfully.");
+        } else {
+            System.out.println("Failed to rename folder.");
+        }
+    }
+
+    private void renameFile() {
+        System.out.print("Enter the current file name: ");
+        String oldFileName = scanner.nextLine();
+        System.out.print("Enter the new file name: ");
+        String newFileName = scanner.nextLine();
+        java.io.File oldFile = new java.io.File(oldFileName + ".txt");
+        java.io.File newFile = new java.io.File(newFileName + ".txt");
+        if (oldFile.renameTo(newFile)) {
+            System.out.println("File renamed successfully.");
+        } else {
+            System.out.println("Failed to rename file.");
+        }
+    }
+
+    private void viewAllFiles() {
+        System.out.println("All Files");
+        displayDateTime();
+        try {
+            Files.walk(Paths.get(".")) 
+                .filter(Files::isRegularFile) // Filters to include only regular files
+                .filter(path -> path.toString().endsWith(".txt")) // Filters to include only .txt files
+                .forEach(path -> {
+                    try {
+                        System.out.println(path.getFileName() +"\n"+ "(Modified on " + Files.getLastModifiedTime(path) + ")");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+        } catch (IOException e) {
+            System.out.println("An error occurred while listing the files.");
+            e.printStackTrace();
+        }
+    }
+
+    private void editFile() {
+        System.out.print("Enter the full path of the file to edit (including folder name if applicable): ");
+        String fileName = scanner.nextLine();
+        try (FileWriter writer = new FileWriter(fileName + ".txt", true)) {
+            System.out.print("Enter content to append to the file: ");
+            String content = scanner.nextLine();
+            writer.write(content);
+            System.out.println("File edited successfully. Modified date & time: " + LocalDate.now() + " " + LocalTime.now());
+        } catch (IOException e) {
+            System.out.println("An error occurred while editing the file.");
+            e.printStackTrace();
+        }
+    }
+    
+    private void displayFile() {
+        System.out.print("Enter the file name to display: ");
+        String fileName = scanner.nextLine();
+        try {
+            String content = Files.readString(Paths.get(fileName + ".txt"));
+            System.out.println("File content:");
+            System.out.println(content);
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the file.");
+            e.printStackTrace();
+        }
+    }
+    
+    private void searchFile() {
+        System.out.print("Enter the name of the file to search: ");
+        String fileName = scanner.nextLine();
+        java.io.File file = new java.io.File(fileName + ".txt");
+        if (file.exists()) {
+            System.out.println("File found: " + fileName + ".txt");
+            System.out.println("Modified date & time: " + LocalDate.now() + " " + LocalTime.now());
+        } else {
+            System.out.println("File not found.");
+        }
+    }
+    
+}
