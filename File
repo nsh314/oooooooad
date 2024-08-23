@@ -1,0 +1,58 @@
+package fileManagerAssignment;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+public class File {
+
+	private String fileName;
+	private String folderName;
+	private LocalDate dateModified;
+  private LocalTime timeModified;
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public String getFolderName() {
+		return folderName;
+	}
+
+	public LocalDate getDateModified() {
+		return dateModified;
+	}
+	
+	public LocalTime getTimeModified() {
+		return timeModified;
+	}
+	
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public void setFolderName(String folderName) {
+		this.folderName = folderName;
+	}
+
+	public void setDateModified(LocalDate dateModified) {
+		this.dateModified = dateModified;
+	}
+
+	public void setTimeModified(LocalTime timeModified) {
+		this.timeModified = timeModified;
+	}
+	
+	private void updateModifiedDateTime() {
+        this.dateModified = LocalDate.now();
+        this.timeModified = LocalTime.now();
+	}
+	
+    public File(String fileName, String folderName, LocalDate date, LocalTime time) {
+        this.fileName = fileName;
+        this.folderName = folderName;
+        this.dateModified = date;
+        this.timeModified = time;
+        updateModifiedDateTime();
+    }
+
+    
